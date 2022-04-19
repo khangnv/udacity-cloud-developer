@@ -61,3 +61,20 @@ Developer mode runs off the TypeScript source. Any saves will reset the server a
 - Go to aws console
   - add environment properties in Software category.
   - click on elastic beanstalk endpoint to check the api.
+- Update backend code
+  - yarn build
+  - eb deploy
+- Using Postman to call api
+
+  - /api/v0/users/auth: get Bearer Token
+  - /api/v0/feed: add Bearer token
+    ...and body
+    {
+    "caption": "Feed 01",
+    "url": "Feed_01.jpg"
+    }
+  - /api/v0/feed/signed-url/Feed_01.jpg: get put signed url.
+  - using the put signed url to upload image.
+
+  - Clean up
+    - eb terminate
