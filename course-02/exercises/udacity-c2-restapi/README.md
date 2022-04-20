@@ -54,9 +54,9 @@ Developer mode runs off the TypeScript source. Any saves will reset the server a
 - aws configure
 - eb init
   - select region, application name, platform, keypair
+- yarn build
 - edit config.yml
   - add "deploy" section with "artifact: ./www/Archive.zip"
-- yarn build
 - eb create
 - Go to aws console
   - add environment properties in Software category.
