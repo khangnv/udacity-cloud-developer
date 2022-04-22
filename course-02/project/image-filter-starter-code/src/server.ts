@@ -19,7 +19,7 @@ import { filterImageFromURL, deleteLocalFiles } from './util/util';
     async (req: express.Request, res: express.Response) => {
       try {
         // image_url: URL of a publicly accessible image
-        const image_url: string = req.query.image_url as string;
+        const image_url: string = req.query?.image_url as string;
 
         // 1. validate the image_url query
         if (!image_url) {
