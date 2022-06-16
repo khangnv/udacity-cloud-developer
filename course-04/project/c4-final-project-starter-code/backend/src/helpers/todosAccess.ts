@@ -18,12 +18,6 @@ export class TodosAccess {
   async getTodosByUserId(userId: string): Promise<TodoItem[]> {
     logger.info(`Getting all todos by userId=${userId}`)
 
-    const userExists = await this.isUserExists(userId)
-    if (!userExists) {
-      logger.error(`The userId ${userId} does not exist.`)
-      return undefined
-    }
-
     const result = await this.docClient
       .query({
         TableName: this.todosTable,
@@ -125,18 +119,6 @@ export class TodosAccess {
     }
 
     await this.docClient.update(updatingItem).promise()
-  }
-
-  async isUserExists(userId: string) {
-    const result = await this.docClient
-      .get({
-        TableName: this.todosTable,
-        Key: {
-          id: userId
-        }
-      })
-      .promise()
-    return !!result.Item
   }
 }
 
