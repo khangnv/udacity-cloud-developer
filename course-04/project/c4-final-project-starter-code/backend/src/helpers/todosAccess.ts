@@ -11,8 +11,7 @@ const logger = createLogger('TodosAccess')
 export class TodosAccess {
   constructor(
     private readonly docClient: DocumentClient = createDynamoDBClient(),
-    private readonly todosTable = process.env.TODOS_TABLE,
-    private readonly todosTableIndex = process.env.TODOS_CREATED_AT_INDEX
+    private readonly todosTable = process.env.TODOS_TABLE
   ) {}
 
   async getTodosByUserId(userId: string): Promise<TodoItem[]> {
@@ -21,7 +20,6 @@ export class TodosAccess {
     const result = await this.docClient
       .query({
         TableName: this.todosTable,
-        IndexName: this.todosTableIndex,
         KeyConditionExpression: '#userId =:userId',
         ExpressionAttributeNames: {
           '#userId': 'userId'
