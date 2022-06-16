@@ -55,8 +55,13 @@ export const handler = async (
 }
 
 async function verifyToken(authHeader: string): Promise<JwtPayload> {
+  logger.info(`Begin verifying token`)
+
   const token = getToken(authHeader)
+  logger.info('Generated token')
+
   const jwt: Jwt = decode(token, { complete: true }) as Jwt
+  logger.info('Token is decoded')
 
   // TODO: Implement token verification
   // You should implement it similarly to how it was implemented for the exercise for the lesson 5
@@ -71,6 +76,8 @@ async function verifyToken(authHeader: string): Promise<JwtPayload> {
   const kid = jwt.header.kid
   const key = await client.getSigningKey(kid)
   const signingKey = key.getPublicKey()
+  logger.info('Cetificate is loaded.')
+
   return verify(token, signingKey, { algorithms: ['RS256'] }) as JwtPayload
 }
 

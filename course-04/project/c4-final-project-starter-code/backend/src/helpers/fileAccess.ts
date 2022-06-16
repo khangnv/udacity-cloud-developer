@@ -3,11 +3,10 @@ import { S3 } from 'aws-sdk'
 import * as AWSXRay from 'aws-xray-sdk'
 import { createLogger } from '../utils/logger'
 
-const XAWS = AWSXRay.captureAWS(AWS)
-const logger = createLogger('AttachmentUtils')
+const logger = createLogger('FileAccess')
 
-// TODO: Implement the fileStogare logic
-export class AttachmentUtils {
+// TODO: Implement the fileStorage logic
+export class FileAccess {
   constructor(
     private readonly s3: S3 = createS3Client(),
     private readonly s3BucketName = process.env.ATTACHMENT_S3_BUCKET,
@@ -33,7 +32,9 @@ export class AttachmentUtils {
 }
 
 function createS3Client(): S3 {
-  return new XAWS.S3({
+  const XAWS = AWSXRay.captureAWS(AWS)
+  const s3 = new XAWS.S3({
     signatureVersion: 'v4'
   })
+  return s3
 }

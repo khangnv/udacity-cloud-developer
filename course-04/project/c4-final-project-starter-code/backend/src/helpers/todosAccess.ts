@@ -5,7 +5,6 @@ import { createLogger } from '../utils/logger'
 import { TodoItem } from '../models/TodoItem'
 import { TodoUpdate } from '../models/TodoUpdate'
 
-const XAWS = AWSXRay.captureAWS(AWS)
 const logger = createLogger('TodosAccess')
 
 // TODO: Implement the dataLayer logic
@@ -29,11 +28,13 @@ export class TodosAccess {
       .query({
         TableName: this.todosTable,
         IndexName: this.todosTableIndex,
-        KeyConditionExpression: 'userId = :userId',
+        KeyConditionExpression: '#userId =:userId',
+        ExpressionAttributeNames: {
+          '#userId': 'userId'
+        },
         ExpressionAttributeValues: {
           ':userId': userId
-        },
-        ScanIndexForward: false
+        }
       })
       .promise()
 
@@ -67,12 +68,16 @@ export class TodosAccess {
         userId: userId,
         todoId: todoId
       },
+      ExpressionAttributeNames: {
+        '#todo_name': 'name'
+      },
       ExpressionAttributeValues: {
         ':name': todo.name,
         ':dueDate': todo.dueDate,
         ':done': todo.done
       },
-      UpdateExpression: 'set name = :name, dueDate = :dueDate, done = :done',
+      UpdateExpression:
+        'set #todo_name = :name, dueDate = :dueDate, done = :done',
       ReturnValues: 'ALL_NEW'
     }
 
@@ -109,10 +114,13 @@ export class TodosAccess {
         userId: userId,
         todoId: todoId
       },
+      ExpressionAttributeNames: {
+        '#todo_attachmentUrl': 'attachmentUrl'
+      },
       ExpressionAttributeValues: {
         ':attachmentUrl': attachmentUrl
       },
-      UpdateExpression: 'set attachmentUrl = :attachmentUrl',
+      UpdateExpression: 'SET #todo_attachmentUrl = :attachmentUrl',
       ReturnValues: 'ALL_NEW'
     }
 
@@ -132,14 +140,11 @@ export class TodosAccess {
   }
 }
 
-function createDynamoDBClient() {
-  if (process.env.IS_OFFLINE) {
-    logger.info('Creating a local DynamoDB instance')
-    return new AWS.DynamoDB.DocumentClient({
-      region: 'localhost',
-      endpoint: 'http://localhost:8000'
-    })
-  }
-
-  return new AWS.DynamoDB.DocumentClient()
+function createDynamoDBClient(): DocumentClient {
+  const service = new AWS.DynamoDB()
+  const client = new AWS.DynamoDB.DocumentClient({
+    service: service
+  })
+  AWSXRay.captureAWSClient(service)
+  return client
 }

@@ -6,7 +6,7 @@
     "@types/axios": "^0.14.0",
     "@types/http-errors": "^1.6.1",
     "aws-xray-sdk": "^2.2.0",
-    "axios": "^0.18.0",
+    "axios": "^0.27.2",
     "http-errors": "^1.7.2",
     "jsonwebtoken": "^8.5.1",
     "jwks-rsa": "^2.0.5",
@@ -28,7 +28,7 @@
     "serverless-webpack": "^5.3.5",
     "ts-loader": "^5.3.3",
     "typescript": ">=3.8.0",
-    "webpack": "^4.29.6"
+    "webpack": "^5.73.0"
   },
   "author": "Ivan Mushketyk",
   "license": "MIT"

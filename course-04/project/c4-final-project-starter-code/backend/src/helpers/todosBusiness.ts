@@ -1,19 +1,19 @@
 import { TodosAccess } from './todosAccess'
-import { AttachmentUtils } from './attachmentUtils'
+import { FileAccess } from './fileAccess'
 import { TodoItem } from '../models/TodoItem'
+import { TodoUpdate } from '../models/TodoUpdate'
 import { CreateTodoRequest } from '../requests/CreateTodoRequest'
 import { UpdateTodoRequest } from '../requests/UpdateTodoRequest'
-import { createLogger } from '../utils/logger'
 import * as uuid from 'uuid'
-import * as createError from 'http-errors'
-import { getUserId } from '../lambda/utils'
-import { TodoUpdate } from '../models/TodoUpdate'
+import { createLogger } from '../utils/logger'
 
 // TODO: Implement businessLogic
+const logger = createLogger('TodosBusiness')
 const todosAccess = new TodosAccess()
-const attachmentUtils = new AttachmentUtils()
+const fileAccess = new FileAccess()
 
 export async function getTodosByUserId(userId: string): Promise<TodoItem[]> {
+  logger.info(`Getting todos by userId=${userId}`)
   return todosAccess.getTodosByUserId(userId)
 }
 
@@ -21,6 +21,8 @@ export async function createTodo(
   createTodoRequest: CreateTodoRequest,
   userId: string
 ): Promise<TodoItem> {
+  logger.info(`Creating a new todo of userId=${userId}`)
+
   const todoId = uuid.v4()
 
   return await todosAccess.createTodo({
@@ -38,6 +40,8 @@ export async function updateTodo(
   userId: string,
   todoId: string
 ): Promise<TodoUpdate> {
+  logger.info(`Updating a todo of userId=${userId} with todoId=${todoId}`)
+
   const updatingItem: TodoUpdate = {
     name: updateTodoRequest.name,
     dueDate: updateTodoRequest.dueDate,
@@ -47,6 +51,7 @@ export async function updateTodo(
 }
 
 export async function deleteTodo(userId: string, todoId: string) {
+  logger.info(`Deleting a todo of userId=${userId} with todoId=${todoId}`)
   await todosAccess.deleteTodo(userId, todoId)
 }
 
@@ -54,8 +59,14 @@ export async function generateUploadUrl(
   userId: string,
   todoId: string
 ): Promise<string> {
-  const presignedUrl = await attachmentUtils.getSignedUrl(todoId)
-  const attachmentUrl = attachmentUtils.getAttachmentUrl(todoId)
+  logger.info(
+    `Generating an upload url a todo of userId=${userId} with todoId=${todoId}`
+  )
+
+  const presignedUrl = await fileAccess.getSignedUrl(todoId)
+  const attachmentUrl = fileAccess.getAttachmentUrl(todoId)
   await todosAccess.updateAttachmentUrl(userId, todoId, attachmentUrl)
+
+  logger.info(`Generated an upload url: ${presignedUrl}`)
   return presignedUrl
 }
