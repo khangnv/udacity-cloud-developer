@@ -5,7 +5,7 @@ import { verify, decode } from 'jsonwebtoken'
 import { createLogger } from '../../utils/logger'
 import { Jwt } from '../../auth/Jwt'
 import { JwtPayload } from '../../auth/JwtPayload'
-import { JwksClient } from 'jwks-rsa'
+import Axios from 'axios'
 
 const logger = createLogger('auth')
 
@@ -68,17 +68,26 @@ async function verifyToken(authHeader: string): Promise<JwtPayload> {
   // You can read more about how to do this here: https://auth0.com/blog/navigating-rs256-and-jwks/
 
   // Retrieving the JWK by using https://www.npmjs.com/package/jwks-rsa
-  const client = new JwksClient({
-    jwksUri: jwksUrl,
-    requestHeaders: {}, // Optional
-    timeout: 30000 // Defaults to 30s
-  })
-  const kid = jwt.header.kid
-  const key = await client.getSigningKey(kid)
-  const signingKey = key.getPublicKey()
+  const jwtKid = jwt.header.kid
+  let certificate: string | Buffer
+
+  try {
+    const jwks = await Axios.get(jwksUrl)
+    const signingKey = jwks.data.keys.filter((k) => k.kid === jwtKid)[0]
+
+    if (!signingKey) {
+      throw new Error(`Unable to find a signing key that matches '${jwtKid}'`)
+    }
+    const { x5c } = signingKey
+
+    certificate = `-----BEGIN CERTIFICATE-----\n${x5c[0]}\n-----END CERTIFICATE-----`
+  } catch (error) {
+    logger.info(`Error While getting Certificate: ${error}`)
+  }
+
   logger.info('Cetificate is loaded.')
 
-  return verify(token, signingKey, { algorithms: ['RS256'] }) as JwtPayload
+  return verify(token, certificate, { algorithms: ['RS256'] }) as JwtPayload
 }
 
 function getToken(authHeader: string): string {
