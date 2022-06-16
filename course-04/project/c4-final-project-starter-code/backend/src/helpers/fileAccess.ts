@@ -17,7 +17,7 @@ export class FileAccess {
     logger.info(`Creating an upload url for todo ${todoId}.`)
 
     const signedUrl: string = await this.s3.getSignedUrlPromise('putObject', {
-      BucketName: this.s3BucketName,
+      Bucket: this.s3BucketName,
       Key: todoId,
       Expires: parseInt(this.s3SignedUrlExpiration)
     })
